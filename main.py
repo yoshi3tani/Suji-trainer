@@ -318,8 +318,28 @@ st.title(L["app_title"])
 target = st.radio(L["target"], [("jp", L["target_jp"]), ("th", L["target_th"])],
                   horizontal=True, index=0, format_func=lambda x: x[1])[0]
 
+#旧
+# URLパラメータでデフォルト列数を指定（例: ?cols=1）
+#params = st.experimental_get_query_params()
+#try:
+#    default_cols = max(1, min(10, int(params.get("cols", ["4"])[0])))
+#except:
+#    default_cols = 4
+# 新:
+qp = st.query_params  # dictライク
+raw = qp.get("cols", "4")
+if isinstance(raw, list):  # 念のため互換
+    raw = raw[0]
+try:
+    default_cols = max(1, min(10, int(raw)))
+except Exception:
+    default_cols = 4
+
 with st.expander(L["layout_title"], expanded=False):
-    cols_per_row = st.select_slider(L["cols_label"], options=[4,6,8,10], value=4)
+    cols_per_row = st.slider(L["cols_label"], min_value=1, max_value=10,
+                             value=default_cols, step=1)
+
+st.query_params["cols"] = str(cols_per_row)
 
 # 任意入力（テキストで受け、JSの整数上限を回避）
 s = st.text_input(L["input_label"], value="")
